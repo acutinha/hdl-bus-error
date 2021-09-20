@@ -1,0 +1,88 @@
+//NAME: Akhil Robertson Cutinha
+//UIN: 129000504
+
+/**
+ * Inputs: reset
+
+ * A traffic signal has 3 light stages: RED(R), YELLOW(Y), GREEN(G)
+ * The lights change based on a Timer running on system clock
+ * The Timer starts at 0000, and increments by 1 every clock cycle. The
+ * Timer wraps to 0000 when it reaches a count of 15.  
+ * In other words, count=<0,1,2,3,4,5,6,....,15,0,1,2,...>
+ * The Timer's count value is used in traffic light transition
+ 
+ * Timer starts at count == 0 with RED light state
+ 
+ * The traffic controller enables the traffic light as follows:
+ 	* RED: means STOP while count < 3  
+		* RED --> GREEN at count == 3       
+ 	* GREEN: means GO while 3 <= count < 12
+		* GREEN --> YELLOW at count == 12
+	* YELLOW: means PREPARE TO STOP while 12 <= count < 15
+		* YELLOW to RED: at count === 15
+ 
+ * Anytime RESET is turned ON (reset == 1) the controller resets the count and 
+ * brings the traffic light to RED
+
+ * Outputs 
+
+ * 2-bit signal light[2] for traffic light based on internal 
+ * timer running on the system clock signal.
+ * Uses encoding: light[0..1]==00 for red, light[0..1]==10 for green, and light[0..1]==01 for yellow;
+
+ * 4-bit signal count showing the state of the Timer
+ * count[0..3]
+
+ */
+
+CHIP TrafficController {
+
+    IN reset;
+    OUT count[4], light[2],gr[2],gree;
+
+	PARTS:
+	// Put your code here:	
+	//PC(in= false,load= false,inc= true,reset= reset, out[0..3]= count, out[0] = a, out[1] = b, out[2]= c, out[3] = d);
+
+	//not of all bits
+	Not(in=a, out=na);
+	Not(in=b, out=nb);
+	Not(in=c, out=nc);
+	Not(in=d, out=nd);
+
+	//red
+	And(a= na, b= nb, out= a1);
+	And(a= nc, b= nd, out= a2);
+	And(a= a1, b= a2, out= a3);
+
+	And(a= a, b= b, out= a4);
+	And(a= c, b= d, out= a5);
+	And(a= a4, b= a5, out= a6);
+
+	Or(a= a3, b= a6, out= red);
+	Mux16(a[0]= pS1,a[1]=pS2, b[0..1]= false, sel= red, out[0..1]= reg1);
+	
+	//And(a= a4, b= a2, out= gree,out= green); // gree to see the output for debugging
+	And(a= a4, b= a2,out= green);
+	Add16(a[0..1]= reg1, b[1]= true, out[0..1]= g, out[0..1]= gr);
+	Mux16(a[0..1]= reg1, b[0..1]= g, sel= green, out[0..1]= reg2);
+
+	And(a= a1, b= a5, out= yellow);
+	Add16(a[0..1]= reg1, b[0..1]= true, out[0..1]= y, out[0..1]= yl);
+	Mux16(a[0..1]= reg2, b[0..1]= yl, sel= yellow, out[0..1]= light, out[0]= reg31, out[1]= reg32);
+
+	//Register
+	DFF(in=reg31, out=pS1);
+	DFF(in=reg32, out=pS2);
+
+	/*
+	And(a=na, b=nb, out=anab);
+	Or(a=nd, b=nc, out=oncd);
+	And(a=anab, b=oncd, out=t1);
+
+	And(a=a, b=b, out=ab);
+	And(a=c, b=d, out=cd);
+	And(a=ab, b=cd, out=r);
+	Not(in=r, out= light[0], out= light[1]);
+	*/
+}

@@ -1,0 +1,13 @@
+// Hello this is a single line comment :)
+/**
+* and this is a multiline comment
+*/
+CHIP Example2 {
+    IN a, b;
+    OUT out;
+
+    PARTS:
+    	Test(a=a,b=b,out=o1);
+    	Test1(a=o1,b=b,out=o2);
+    	Test2(a=o2,b=b,out=out);
+}

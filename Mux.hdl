@@ -1,0 +1,20 @@
+//NAME: Akhil Robertson Cutinha 
+//UIN: 129000504
+
+/** 
+ * Multiplexor:
+ * out = a if sel == 0
+ *       b otherwise
+ */
+
+CHIP Mux {
+    IN a, b, sel[4];
+    OUT out;
+
+    PARTS:
+    // Put your code here:
+    Not(in=sel[0..2], out=notSel);//(in= sel,out= notSel);
+    And(a= a,b= notSel,out= aAndsel);
+    And(a= sel,b= b,out= bAndsel);
+    Or(a= aAndsel[0..2],b= bAndsel,out= out);
+}
